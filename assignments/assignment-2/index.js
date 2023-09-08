@@ -6,12 +6,16 @@ console.log(data);
 const host = "localhost";
 const port = 3000;
 
+const handleErrors = (res, message = "Something went wrong from our side") => {
+    res.writeHead(500, { "Content-Type": "text/plain" });
+    res.end(message);
+};
+
 const server = http.createServer((req, res) => {
     if (req.url === "/styles.css") {
         fs.readFile("styles.css", "utf-8", (err, css) => {
             if (err) {
-                res.writeHead(500, { "Content-Type": "text/plain" });
-                res.end("Something went wrong from our side");
+                handleErrors(res);
             }
             res.setHeader("Content-Type", "text/css");
             res.end(css);
@@ -19,15 +23,13 @@ const server = http.createServer((req, res) => {
     } else if (req.url === "/") {
         fs.readFile("templates/index.html", "utf-8", (err, document) => {
             if (err) {
-                res.writeHead(500, { "Content-Type": "text/plain" });
-                res.end("Something went wrong from our side");
+                handleErrors(res);
             }
             const users = [];
 
             fs.readFile("templates/user.html", "utf-8", (err, user) => {
                 if (err) {
-                    res.writeHead(500, { "Content-Type": "text/plain" });
-                    res.end("Something went wrong from our side");
+                    handleErrors(res);
                 }
 
                 for (const id in data) {
@@ -52,17 +54,15 @@ const server = http.createServer((req, res) => {
                 res.end(document.replace("{content}", concattedUsers));
             });
         });
-    } else {
+    } else if (Number(req.url.slice(1)) <= 10) {
         fs.readFile("templates/index.html", "utf-8", (err, document) => {
             if (err) {
-                res.writeHead(500, { "Content-Type": "text/plain" });
-                res.end("Something went wrong from our side");
+                handleErrors(res);
             }
 
             fs.readFile("templates/user.html", "utf-8", (err, user) => {
                 if (err) {
-                    res.writeHead(500, { "Content-Type": "text/plain" });
-                    res.end("Something went wrong from our side");
+                    handleErrors(res);
                 }
 
                 const person = data[req.url.slice(1)];
@@ -78,6 +78,8 @@ const server = http.createServer((req, res) => {
                 res.end(document.replace("{content}", dynamicUser));
             });
         });
+    } else {
+        handleErrors(res, "Wrong address");
     }
 });
 
