@@ -1,0 +1,11 @@
+{
+    "name": "api-jira-like-app",
+    "version": "1.0.0",
+    "description": "Jira Like Application",
+    "main": "index.js",
+    "scripts": {
+        "start:dev": "nodemon index.js"
+    },
+    "author": "Ali Ramazon",
+    "license": "ISC"
+}
