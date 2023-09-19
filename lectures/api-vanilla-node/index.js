@@ -79,6 +79,7 @@ const deleteTodo = (req, res) => {
 };
 
 const server = http.createServer((req, res) => {
+    console.log(req.url);
     const isPathMatch = verifyPathMatch(req.url);
     if (req.url === "/todos" && req.method === "GET") {
         getAllTodos(res);
