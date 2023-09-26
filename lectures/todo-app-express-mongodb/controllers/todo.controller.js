@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 class TodoController {
     getAll = async (req, res) => {
         const { db } = req;
@@ -32,7 +33,7 @@ class TodoController {
         }
     };
 
-    getAll = async (req, res) => {
+    getOne = async (req, res) => {
         try {
             const { params, db } = req;
 
@@ -45,8 +46,9 @@ class TodoController {
                 data: todo,
             });
         } catch (error) {
+            console.log(error);
             res.status(500).json({
-                message: "Failed",
+                message: error,
             });
         }
     };
@@ -60,7 +62,7 @@ class TodoController {
             res.status(200).send();
         } catch (error) {
             res.status(500).json({
-                message: "Failed",
+                message: error,
             });
         }
     };
