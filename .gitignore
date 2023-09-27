@@ -1,4 +1,7 @@
 assignments/**/node_modules
 assessments/**/node_modules
 lectures/**/node_modules
+assignments/**/.env
+assessments/**/.env
+lectures/**/.env
 .DS_Store
