@@ -13,6 +13,28 @@ class UserService {
             throw new Error(error);
         }
     };
+
+    login = async (input) => {
+        try {
+            const user = await prisma.user.findFirst({
+                where: {
+                    email: input.email,
+                },
+            });
+
+            if (!user) throw new Error("Invalid Credentials");
+
+            const isPasswordMatchs = hasher.compare(
+                input.password,
+                user.password
+            );
+            if (!isPasswordMatchs) {
+                throw new Error("Invalid Credentials");
+            }
+        } catch (error) {
+            throw error;
+        }
+    };
 }
 
 export const userService = new UserService();
