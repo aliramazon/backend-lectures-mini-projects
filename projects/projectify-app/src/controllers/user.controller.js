@@ -10,7 +10,6 @@ class UserController {
             firstName: body.firstName,
             lastName: body.lastName,
             password: body.password,
-            bio: body.bio,
         };
 
         try {
