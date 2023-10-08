@@ -1,6 +1,7 @@
 import { prisma } from "../prisma/index.js";
 import { hasher, crypto } from "../utils/hash.js";
 import { mailer } from "../utils/mailer.js";
+import { date } from "../utils/date.js";
 
 class UserService {
     signUp = async (input) => {
@@ -102,6 +103,93 @@ class UserService {
             });
         } catch (error) {
             console.log(error);
+            throw error;
+        }
+    };
+
+    forgotPassword = async (email) => {
+        try {
+            const user = await prisma.user.findFirst({
+                where: {
+                    email,
+                },
+                select: {
+                    id: true,
+                },
+            });
+
+            if (!user) {
+                throw new Error(
+                    "We could not find a user with the email you provided"
+                );
+            }
+
+            const passwordResetToken = crypto.createToken();
+            const hashedPasswordResetToken = crypto.hash(passwordResetToken);
+
+            await prisma.user.update({
+                where: {
+                    id: user.id,
+                },
+                data: {
+                    passwordResetToken: hashedPasswordResetToken,
+                    passwordResetTokenExpirationDate: date.addMinutes(10),
+                },
+            });
+
+            await mailer.sendPasswordResetToken(email, passwordResetToken);
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    resetPassword = async (token, password) => {
+        try {
+            const hashedPasswordResetToken = crypto.hash(token);
+            const user = await prisma.user.findFirst({
+                where: {
+                    passwordResetToken: hashedPasswordResetToken,
+                },
+                select: {
+                    id: true,
+                    passwordResetToken: true,
+                    passwordResetTokenExpirationDate: true,
+                },
+            });
+
+            if (!user) {
+                throw new Error("User was not found with provided token");
+            }
+
+            const currentTime = new Date();
+            const tokenExpDate = new Date(
+                user.passwordResetTokenExpirationDate
+            );
+
+            if (tokenExpDate < currentTime) {
+                // Token Expired;
+                throw new Error("Reset Token Expired");
+            }
+
+            const isTokenMatchs = crypto.compare(
+                token,
+                hashedPasswordResetToken
+            );
+            if (!isTokenMatchs) {
+                throw new Error("Invalid Reset Token");
+            }
+
+            await prisma.user.update({
+                where: {
+                    id: user.id,
+                },
+                data: {
+                    password: await hasher.hash(password),
+                    passwordResetToken: "",
+                    passwordResetTokenExpirationDate: null,
+                },
+            });
+        } catch (error) {
             throw error;
         }
     };

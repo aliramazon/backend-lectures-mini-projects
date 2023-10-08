@@ -24,8 +24,20 @@ class Mailer {
         try {
             this.send({
                 to: emailAddress,
-                subject: "Activate Your Account",
+                subject: "Projectify App | Activate Your Account",
                 html: `<a style="color: red;" href="http://localhost:4000/users/activate?activationToken=${token}">Verify your email</a>`,
+            });
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    sendPasswordResetToken = async (emailAddress, token) => {
+        try {
+            this.send({
+                to: emailAddress,
+                subject: "Projectify App | Reset Password",
+                html: `<a href="http://localhost:3000/reset-password/passwordResetToken=${token}">Reset Your Password</a>`,
             });
         } catch (error) {
             throw error;
@@ -34,19 +46,3 @@ class Mailer {
 }
 
 export const mailer = new Mailer();
-
-// const mailOptions = {
-//     to: "turantech.web@gmail.com",
-//     subject: "Activate your account",
-//     text: "Hello, testing the connection",
-// };
-
-// const transporter = nodemailer.createTransport({
-//     host: "smtp.gmail.com",
-//     port: 587,
-//     secure: false,
-//     auth: {
-//         user: "turantech.web@gmail.com",
-//         pass: "amdd wyrn fbox cixd",
-//     },
-// });
