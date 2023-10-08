@@ -25,7 +25,7 @@ class Mailer {
             this.send({
                 to: emailAddress,
                 subject: "Activate Your Account",
-                html: `<a style="color: red;" href="http://localhost:4000/users/activate?activationToken=${token}">Verify your email</a>`,
+                html: `<a href="http://localhost:4000/users/activate?activationToken=${token}">Verify your email</a>`,
             });
         } catch (error) {
             throw error;
