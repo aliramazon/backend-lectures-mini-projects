@@ -34,19 +34,3 @@ class Mailer {
 }
 
 export const mailer = new Mailer();
-
-// const mailOptions = {
-//     to: "turantech.web@gmail.com",
-//     subject: "Activate your account",
-//     text: "Hello, testing the connection",
-// };
-
-// const transporter = nodemailer.createTransport({
-//     host: "smtp.gmail.com",
-//     port: 587,
-//     secure: false,
-//     auth: {
-//         user: "turantech.web@gmail.com",
-//         pass: "amdd wyrn fbox cixd",
-//     },
-// });
