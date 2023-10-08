@@ -1,10 +1,10 @@
 import { prisma } from "../prisma/index.js";
-import { hasher } from "../utils/hash.js";
+import { bcrypt } from "../utils/bcrypt.js";
 
 class UserService {
     signUp = async (input) => {
         try {
-            const hashedPassword = await hasher.hash(input.password);
+            const hashedPassword = await bcrypt.hash(input.password);
             await prisma.user.create({
                 data: { ...input, password: hashedPassword },
             });
@@ -24,11 +24,11 @@ class UserService {
 
             if (!user) throw new Error("Invalid Credentials");
 
-            const isPasswordMatchs = hasher.compare(
+            const isPasswordMatches = bcrypt.compare(
                 input.password,
                 user.password
             );
-            if (!isPasswordMatchs) {
+            if (!isPasswordMatches) {
                 throw new Error("Invalid Credentials");
             }
         } catch (error) {
