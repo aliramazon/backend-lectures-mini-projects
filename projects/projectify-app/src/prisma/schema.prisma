@@ -20,8 +20,8 @@ model User {
     lastName                         String
     password                         String
     status                           AccountStatus @default(INACTIVE)
-    activationToken                  String
-    passwordResetToken               String
+    activationToken                  String?
+    passwordResetToken               String?
     passwordResetTokenExpirationDate DateTime?
     createdAt                        DateTime      @default(now())
     updatedAt                        DateTime      @updatedAt

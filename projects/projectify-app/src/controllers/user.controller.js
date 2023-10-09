@@ -110,7 +110,7 @@ class UserController {
             });
             return;
         }
-        if (!headers["authorization"]) {
+        if (!headers.authorization) {
             res.status(400).json({
                 message: "Reset Token is missing",
             });

@@ -1,12 +1,13 @@
 import { prisma } from "../prisma/index.js";
-import { hasher, crypto } from "../utils/hash.js";
+import { crypto } from "../utils/crypto.js";
 import { mailer } from "../utils/mailer.js";
+import { bcrypt } from "../utils/bcrypt.js";
 import { date } from "../utils/date.js";
 
 class UserService {
     signUp = async (input) => {
         try {
-            const hashedPassword = await hasher.hash(input.password);
+            const hashedPassword = await bcrypt.hash(input.password);
             const activationToken = crypto.createToken();
             const hashedActivationToken = crypto.hash(activationToken);
             await prisma.user.create({
@@ -57,11 +58,11 @@ class UserService {
                 );
             }
 
-            const isPasswordMatchs = await hasher.compare(
+            const isPasswordMatches = await bcrypt.compare(
                 input.password,
                 user.password
             );
-            if (!isPasswordMatchs) {
+            if (!isPasswordMatches) {
                 throw new Error("Invalid Credentials");
             }
         } catch (error) {
@@ -83,12 +84,6 @@ class UserService {
             });
 
             if (!user) {
-                throw new Error("User was not found with provided token");
-            }
-
-            const isTokenMatchs = crypto.compare(token, user.activationToken);
-
-            if (!isTokenMatchs) {
                 throw new Error("Invalid Token");
             }
 
@@ -98,11 +93,10 @@ class UserService {
                 },
                 data: {
                     status: "ACTIVE",
-                    activationToken: "",
+                    activationToken: null,
                 },
             });
         } catch (error) {
-            console.log(error);
             throw error;
         }
     };
@@ -158,7 +152,7 @@ class UserService {
             });
 
             if (!user) {
-                throw new Error("User was not found with provided token");
+                throw new Error("Invalid Token");
             }
 
             const currentTime = new Date();
@@ -171,21 +165,13 @@ class UserService {
                 throw new Error("Reset Token Expired");
             }
 
-            const isTokenMatchs = crypto.compare(
-                token,
-                hashedPasswordResetToken
-            );
-            if (!isTokenMatchs) {
-                throw new Error("Invalid Reset Token");
-            }
-
             await prisma.user.update({
                 where: {
                     id: user.id,
                 },
                 data: {
-                    password: await hasher.hash(password),
-                    passwordResetToken: "",
+                    password: await bcrypt.hash(password),
+                    passwordResetToken: null,
                     passwordResetTokenExpirationDate: null,
                 },
             });
