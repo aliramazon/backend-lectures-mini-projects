@@ -1,9 +1,7 @@
 class DateUtil {
-    addMinutes(minutes) {
-        const currentDate = new Date();
-        const unixDate = currentDate.setMinutes(
-            currentDate.getMinutes() + minutes
-        );
+    addMinutes(minutes, date) {
+        const startDate = date || new Date();
+        const unixDate = startDate.setMinutes(startDate.getMinutes() + minutes);
 
         return new Date(unixDate);
     }
