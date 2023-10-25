@@ -79,137 +79,129 @@ class UserService {
     };
 
     activate = async (token) => {
-        try {
-            const hashedActivationToken = crypto.hash(token);
-            const user = await prisma.user.findFirst({
-                where: {
-                    activationToken: hashedActivationToken,
-                },
-                select: {
-                    id: true,
-                    activationToken: true,
-                },
-            });
+        const hashedActivationToken = crypto.hash(token);
+        const user = await prisma.user.findFirst({
+            where: {
+                activationToken: hashedActivationToken,
+            },
+            select: {
+                id: true,
+                activationToken: true,
+            },
+        });
 
-            if (!user) {
-                throw new Error("Invalid Token");
-            }
-
-            await prisma.user.update({
-                where: {
-                    id: user.id,
-                },
-                data: {
-                    status: "ACTIVE",
-                    activationToken: null,
-                },
-            });
-        } catch (error) {
-            throw error;
+        if (!user) {
+            throw new CustomError(
+                "User does not exist with with provided Activation Token",
+                404
+            );
         }
+
+        await prisma.user.update({
+            where: {
+                id: user.id,
+            },
+            data: {
+                status: "ACTIVE",
+                activationToken: null,
+            },
+        });
     };
 
     forgotPassword = async (email) => {
-        try {
-            const user = await prisma.user.findFirst({
-                where: {
-                    email,
-                },
-                select: {
-                    id: true,
-                },
-            });
+        const user = await prisma.user.findFirst({
+            where: {
+                email,
+            },
+            select: {
+                id: true,
+            },
+        });
 
-            if (!user) {
-                throw new Error(
-                    "We could not find a user with the email you provided"
-                );
-            }
-
-            const passwordResetToken = crypto.createToken();
-            const hashedPasswordResetToken = crypto.hash(passwordResetToken);
-
-            await prisma.user.update({
-                where: {
-                    id: user.id,
-                },
-                data: {
-                    passwordResetToken: hashedPasswordResetToken,
-                    passwordResetTokenExpirationDate: date.addMinutes(10),
-                },
-            });
-
-            await mailer.sendPasswordResetToken(email, passwordResetToken);
-        } catch (error) {
-            throw error;
+        if (!user) {
+            throw new CustomError(
+                "User does not exist with provided email",
+                404
+            );
         }
+
+        const passwordResetToken = crypto.createToken();
+        const hashedPasswordResetToken = crypto.hash(passwordResetToken);
+
+        await prisma.user.update({
+            where: {
+                id: user.id,
+            },
+            data: {
+                passwordResetToken: hashedPasswordResetToken,
+                passwordResetTokenExpirationDate: date.addMinutes(10),
+            },
+        });
+
+        await mailer.sendPasswordResetToken(email, passwordResetToken);
     };
 
     resetPassword = async (token, password) => {
-        try {
-            const hashedPasswordResetToken = crypto.hash(token);
-            const user = await prisma.user.findFirst({
-                where: {
-                    passwordResetToken: hashedPasswordResetToken,
-                },
-                select: {
-                    id: true,
-                    passwordResetToken: true,
-                    passwordResetTokenExpirationDate: true,
-                },
-            });
+        const hashedPasswordResetToken = crypto.hash(token);
+        const user = await prisma.user.findFirst({
+            where: {
+                passwordResetToken: hashedPasswordResetToken,
+            },
+            select: {
+                id: true,
+                passwordResetToken: true,
+                passwordResetTokenExpirationDate: true,
+            },
+        });
 
-            if (!user) {
-                throw new Error("Invalid Token");
-            }
-
-            const currentTime = new Date();
-            const tokenExpDate = new Date(
-                user.passwordResetTokenExpirationDate
+        if (!user) {
+            throw new CustomError(
+                "User does not exist with  provided Password Reset Token",
+                404
             );
-
-            if (tokenExpDate < currentTime) {
-                // Token Expired;
-                throw new Error("Reset Token Expired");
-            }
-
-            await prisma.user.update({
-                where: {
-                    id: user.id,
-                },
-                data: {
-                    password: await bcrypt.hash(password),
-                    passwordResetToken: null,
-                    passwordResetTokenExpirationDate: null,
-                },
-            });
-        } catch (error) {
-            throw error;
         }
+
+        const currentTime = new Date();
+        const tokenExpDate = new Date(user.passwordResetTokenExpirationDate);
+
+        if (tokenExpDate < currentTime) {
+            // Token Expired;
+            throw new CustomError(
+                "Password Reset Token Expired: Request a new one",
+                400
+            );
+        }
+
+        await prisma.user.update({
+            where: {
+                id: user.id,
+            },
+            data: {
+                password: await bcrypt.hash(password),
+                passwordResetToken: null,
+                passwordResetTokenExpirationDate: null,
+            },
+        });
     };
 
     getMe = async (userId) => {
-        try {
-            const user = await prisma.user.findUnique({
-                where: {
-                    id: userId,
-                },
-                select: {
-                    firstName: true,
-                    lastName: true,
-                    preferredFirstName: true,
-                    email: true,
-                },
-            });
+        const user = await prisma.user.findUnique({
+            where: {
+                id: userId,
+            },
+            select: {
+                firstName: true,
+                lastName: true,
+                preferredFirstName: true,
+                email: true,
+            },
+        });
 
-            if (!user) {
-                throw new Error("User not found");
-            }
-
-            return user;
-        } catch (error) {
-            throw error;
+        if (!user) {
+            throw new Error("User does not exist anymore, 404");
         }
+
+        return user;
     };
 
     createTask = async (userId, input) => {

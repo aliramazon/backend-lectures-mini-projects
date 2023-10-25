@@ -1,6 +1,7 @@
 import { userService } from "../services/user.service.js";
 import jwt from "jsonwebtoken";
 import { catchAsync } from "../utils/catch-async.js";
+import { CustomError } from "../utils/custom-error.js";
 class UserController {
     signUp = catchAsync(async (req, res) => {
         const { body } = req;
@@ -32,119 +33,82 @@ class UserController {
         });
     });
 
-    activate = async (req, res) => {
+    activate = catchAsync(async (req, res) => {
         const {
             query: { activationToken },
         } = req;
 
         if (!activationToken) {
-            res.status(400).json({
-                message: "Activation Token is missing",
-            });
-
-            return;
+            throw new CustomError("Activation Token is missing", 400);
         }
 
-        try {
-            await userService.activate(activationToken);
+        await userService.activate(activationToken);
 
-            res.status(200).json({
-                message: "Success",
-            });
-        } catch (error) {
-            console.log(error);
-            res.status(500).json({
-                message: error.message,
-            });
-        }
-    };
+        res.status(200).json({
+            message: "Success",
+        });
+    });
 
-    forgotPassword = async (req, res) => {
+    forgotPassword = catchAsync(async (req, res) => {
         const {
             body: { email },
         } = req;
 
-        try {
-            await userService.forgotPassword(email);
-            res.status(200).json({
-                message: "Password reset email has been sent",
-            });
-        } catch (error) {
-            res.status(500).json({
-                message: error.message,
-            });
-        }
-    };
+        await userService.forgotPassword(email);
 
-    resetPassword = async (req, res) => {
+        res.status(200).json({
+            message: "Password reset email has been sent",
+        });
+    });
+
+    resetPassword = catchAsync(async (req, res) => {
         const {
             body: { password, passwordConfirm },
             headers,
         } = req;
         if (!password || !passwordConfirm) {
-            res.status(400).json({
-                message: "Password and Password Confirm is required",
-            });
-            return;
+            throw new CustomError(
+                "Both Password and Pasword Confirmation are required",
+                400
+            );
         }
 
         if (password !== passwordConfirm) {
-            res.status(400).json({
-                message: "Password and Password Confirm does not match",
-            });
-            return;
+            throw new CustomError(
+                "Password and Password Confirmation does not match",
+                400
+            );
         }
         if (!headers.authorization) {
-            res.status(400).json({
-                message: "Reset Token is missing",
-            });
+            throw new CustomError("Password Reset Token is missing", 400);
         }
+
         const [bearer, token] = headers.authorization.split(" ");
         if (bearer !== "Bearer" || !token) {
-            res.status(400).json({
-                message: "Invalid Token",
-            });
+            throw new CustomError("Invalid Password Reset Token", 400);
         }
 
-        try {
-            await userService.resetPassword(token, password);
-            res.status(200).json({
-                message: "Password successfully updated",
-            });
-        } catch (error) {
-            res.status(500).json({
-                message: error.message,
-            });
-        }
-    };
+        await userService.resetPassword(token, password);
+        res.status(200).json({
+            message: "Password successfully updated",
+        });
+    });
 
-    getMe = async (req, res) => {
+    getMe = catchAsync(async (req, res) => {
         const { userId } = req;
 
-        try {
-            const me = await userService.getMe(userId);
+        const me = await userService.getMe(userId);
 
-            res.status(200).json({
-                data: me,
-            });
-        } catch (error) {
-            res.status(500).json({
-                message: error.message,
-            });
-        }
-    };
+        res.status(200).json({
+            data: me,
+        });
+    });
 
-    logout = async (req, res) => {
-        try {
-            res.status(200).send({
-                token: "",
-            });
-        } catch (error) {
-            res.status(500).json({
-                message: error.message,
-            });
-        }
-    };
+    logout = catchAsync(async (req, res) => {
+        res.status(200).send({
+            token: "",
+        });
+    });
 
     createTask = async (req, res) => {
         const { userId, body } = req;
