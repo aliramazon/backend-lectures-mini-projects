@@ -10,6 +10,6 @@ userRouter.get("/activate", userController.activate);
 userRouter.patch("/forgot-password", userController.forgotPassword);
 userRouter.patch("/reset-password", userController.resetPassword);
 userRouter.get("/me", CookieMiddleware.verify, userController.getMe);
-userRouter.delete("/logout", CookieMiddleware.verify, userController.logout);
+userRouter.delete("/me/logout", CookieMiddleware.verify, userController.logout);
 
 export { userRouter };

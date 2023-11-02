@@ -29,6 +29,6 @@ model User {
 
 model Session {
     id        String @id @default(auto()) @map("_id") @db.ObjectId
-    sessionId String
+    sessionId String @unique
     userId    String @db.ObjectId
 }

@@ -35,11 +35,9 @@ class UserController {
             const sessionId = await userService.login(input);
             const signedSessionId =
                 "s:" + signature.sign(sessionId, process.env.COOKIE_SECRET);
-            console.log(signedSessionId);
-            console.log(sessionId);
 
             res.cookie("sessionId", signedSessionId, {
-                maxAge: 10000,
+                maxAge: 100000,
                 httpOnly: true,
                 secure: true,
             });

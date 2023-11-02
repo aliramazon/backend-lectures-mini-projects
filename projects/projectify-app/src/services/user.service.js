@@ -235,7 +235,7 @@ class UserService {
         const hashedSessionId = crypto.hash(sessionId);
 
         try {
-            await prisma.session.deleteMany({
+            await prisma.session.delete({
                 where: {
                     sessionId: hashedSessionId,
                 },
