@@ -1,5 +1,4 @@
 import { userService } from "../services/user.service.js";
-import jwt from "jsonwebtoken";
 class UserController {
     signUp = async (req, res) => {
         const { body } = req;
@@ -141,18 +140,6 @@ class UserController {
 
             res.status(200).json({
                 data: me,
-            });
-        } catch (error) {
-            res.status(500).json({
-                message: error.message,
-            });
-        }
-    };
-
-    logout = async (req, res) => {
-        try {
-            res.status(200).send({
-                token: "",
             });
         } catch (error) {
             res.status(500).json({
