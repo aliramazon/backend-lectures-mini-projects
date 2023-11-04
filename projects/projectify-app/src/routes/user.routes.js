@@ -10,11 +10,7 @@ userRouter.get("/activate", userController.activate);
 userRouter.patch("/forgot-password", userController.forgotPassword);
 userRouter.patch("/reset-password", userController.resetPassword);
 userRouter.get("/me", userMiddleware.authenticate, userController.getMe);
-userRouter.delete(
-    "/logout",
-    userMiddleware.authenticate,
-    userController.logout
-);
+
 userRouter.patch(
     "/me/tasks",
     userMiddleware.authenticate,
