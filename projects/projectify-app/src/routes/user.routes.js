@@ -1,13 +1,13 @@
 import { Router } from "express";
-import { userController } from "../controllers/user.controller.js";
-import { userMiddleware } from "../middlewares/user.middleware.js";
+import { adminController } from "../controllers/admin.controller.js";
+import { adminMiddleware } from "../middlewares/admin.middleware.js";
 
-const userRouter = Router();
+const adminRouter = Router();
 
-userRouter.post("/sign-up", userController.signUp);
-userRouter.post("/login", userController.login);
-userRouter.get("/activate", userController.activate);
-userRouter.patch("/forgot-password", userController.forgotPassword);
-userRouter.patch("/reset-password", userController.resetPassword);
-userRouter.get("/me", userMiddleware.authenticate, userController.getMe);
-export { userRouter };
+adminRouter.post("/sign-up", adminController.signUp);
+adminRouter.post("/login", adminController.login);
+adminRouter.get("/activate", adminController.activate);
+adminRouter.patch("/forgot-password", adminController.forgotPassword);
+adminRouter.patch("/reset-password", adminController.resetPassword);
+adminRouter.get("/me", adminMiddleware.authenticate, adminController.getMe);
+export { adminRouter };
