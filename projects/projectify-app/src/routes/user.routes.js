@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { userController } from "../controllers/user.controller.js";
+import { adminController } from "../controllers/admin.controller.js";
 
-const userRouter = Router();
+const adminRouter = Router();
 
-userRouter.post("/sign-up", userController.signUp);
-userRouter.post("/login", userController.login);
-userRouter.get("/activate", userController.activate);
+adminRouter.post("/sign-up", adminController.signUp);
+adminRouter.post("/login", adminController.login);
+adminRouter.get("/activate", adminController.activate);
 
-export { userRouter };
+export { adminRouter };
