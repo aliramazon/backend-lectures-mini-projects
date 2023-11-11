@@ -31,4 +31,4 @@ class AuthMiddleware {
     };
 }
 
-export const adminMiddleware = new AuthMiddleware();
+export const authMiddleware = new AuthMiddleware();
