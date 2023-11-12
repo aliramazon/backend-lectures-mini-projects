@@ -72,6 +72,46 @@ class ProjectController {
         await projectService.changeStatus(params.id, adminId, "ACTIVE");
         res.status(204).send();
     });
+
+    addContributor = catchAsync(async (req, res) => {
+        const { adminId, body, params } = req;
+
+        if (!body.teamMemberId || !params.id) {
+            throw new CustomError(
+                "All fields are required: teamMemberId, project Id",
+                400
+            );
+        }
+
+        await projectService.addContributor(
+            adminId,
+            params.id,
+            body.teamMemberId
+        );
+
+        res.status(200).json({
+            message: `Team member with ${body.teamMemberId} id was added to project with ${params.id} id`,
+        });
+    });
+
+    deactivateContributor = catchAsync(async (req, res) => {
+        const { adminId, body, params } = req;
+
+        if (!body.teamMemberId || !params.id) {
+            throw new CustomError(
+                "All fields are required: teamMemberId, project Id",
+                400
+            );
+        }
+
+        await projectService.deactivateContributor(
+            adminId,
+            params.id,
+            body.teamMemberId
+        );
+
+        res.status(204).send();
+    });
 }
 
 export const projectController = new ProjectController();

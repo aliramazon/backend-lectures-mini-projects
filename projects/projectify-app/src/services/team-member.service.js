@@ -95,6 +95,22 @@ class TeamMemberService {
             },
         });
     };
+
+    verifyTeamMemberAndAdminRelation = async (id, adminId) => {
+        const teamMember = await prisma.teamMember.findUnique({
+            where: {
+                id,
+                adminId,
+            },
+        });
+
+        if (!teamMember) {
+            throw new CustomError(
+                "Forbidden: Team member does not belong to you or it does not exist",
+                403
+            );
+        }
+    };
 }
 
 export const teamMemberService = new TeamMemberService();

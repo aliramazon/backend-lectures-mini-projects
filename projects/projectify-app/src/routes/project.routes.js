@@ -5,6 +5,7 @@ import { projectController } from "../controllers/project.controller.js";
 const projectRouter = Router();
 
 projectRouter.post("/", authMiddleware.authenticate, projectController.create);
+
 projectRouter.get(
     "/:id",
     authMiddleware.authenticate,
@@ -27,6 +28,18 @@ projectRouter.patch(
     "/:id/reactivate",
     authMiddleware.authenticate,
     projectController.reactivate
+);
+
+projectRouter.post(
+    "/:id/add-contributor",
+    authMiddleware.authenticate,
+    projectController.addContributor
+);
+
+projectRouter.patch(
+    "/:id/deactivate-contributor",
+    authMiddleware.authenticate,
+    projectController.deactivateContributor
 );
 
 export { projectRouter };
