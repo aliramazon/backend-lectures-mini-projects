@@ -61,6 +61,7 @@ class TeamMemberService {
                 id: true,
                 firstName: true,
                 lastName: true,
+                position: true,
                 createdAt: true,
             },
         });
