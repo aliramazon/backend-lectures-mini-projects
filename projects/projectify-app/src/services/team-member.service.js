@@ -5,14 +5,14 @@ import { CustomError } from "../utils/custom-error.js";
 import { bcrypt } from "../utils/bcrypt.js";
 
 class TeamMemberService {
-    create = async (userId, input) => {
+    create = async (adminId, input) => {
         const inviteToken = crypto.createToken();
         const hashedInviteToken = crypto.hash(inviteToken);
 
         await prisma.teamMember.create({
             data: {
                 ...input,
-                userId: userId,
+                adminId: adminId,
                 inviteToken: hashedInviteToken,
             },
         });
@@ -27,13 +27,13 @@ class TeamMemberService {
         const hashedInviteToken = crypto.hash(inviteToken);
         const hashedPassword = await bcrypt.hash(password);
 
-        const user = await prisma.teamMember.findFirst({
+        const admin = await prisma.teamMember.findFirst({
             where: {
                 inviteToken: hashedInviteToken,
             },
         });
 
-        if (!user) {
+        if (!admin) {
             throw new CustomError("Invalid Token", 400);
         }
 
@@ -46,6 +46,50 @@ class TeamMemberService {
                 password: hashedPassword,
                 status: "ACTIVE",
                 inviteToken: null,
+            },
+        });
+    };
+
+    getAll = async (adminId) => {
+        const teamMembers = await prisma.teamMember.findMany({
+            where: {
+                adminId: adminId,
+            },
+
+            select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                createdAt: true,
+            },
+        });
+
+        return teamMembers;
+    };
+
+    changeStatus = async (adminId, teamMemberId, status) => {
+        const teamMember = await prisma.teamMember.findFirst({
+            where: {
+                id: teamMemberId,
+                adminId: adminId,
+            },
+        });
+
+        if (!teamMember) {
+            throw new CustomError(
+                "Forbidden: Team member does not belong to your team",
+                403
+            );
+        }
+
+        await prisma.teamMember.update({
+            where: {
+                id: teamMemberId,
+                adminId: adminId,
+            },
+
+            data: {
+                status: status,
             },
         });
     };

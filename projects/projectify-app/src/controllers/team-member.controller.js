@@ -4,7 +4,7 @@ import { teamMemberService } from "../services/team-member.service.js";
 
 class TeamMemberController {
     create = catchAsync(async (req, res) => {
-        const { body, userId } = req;
+        const { body, adminId } = req;
 
         const input = {
             firstName: body.firstName,
@@ -19,8 +19,10 @@ class TeamMemberController {
             );
         }
 
-        await teamMemberService.create(userId, input);
-        res.status(201).send();
+        await teamMemberService.create(adminId, input);
+        res.status(201).send({
+            data: `Team member with ${input.email} has been created`,
+        });
     });
 
     createPassword = catchAsync(async (req, res) => {
@@ -52,6 +54,33 @@ class TeamMemberController {
         res.status(200).json({
             message: "You successfully created a password. Now, you can log in",
         });
+    });
+
+    getAll = catchAsync(async (req, res) => {
+        const { adminId } = req;
+        const teamMembers = await teamMemberService.getAll(adminId);
+
+        res.status(200).json({
+            data: teamMembers,
+        });
+    });
+
+    deactivate = catchAsync(async (req, res) => {
+        const { adminId, body } = req;
+        await teamMemberService.changeStatus(adminId, body.teamMemberId);
+
+        res.status(204).send();
+    });
+
+    reactivate = catchAsync(async (req, res) => {
+        const { adminId, body } = req;
+        await teamMemberService.changeStatus(
+            adminId,
+            body.teamMemberId,
+            "ACTIVE"
+        );
+
+        res.status(204).send();
     });
 }
 
