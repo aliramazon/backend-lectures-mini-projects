@@ -74,40 +74,61 @@ class ProjectController {
     });
 
     addContributor = catchAsync(async (req, res) => {
-        const { adminId, body, params } = req;
+        const { adminId, body } = req;
 
-        if (!body.teamMemberId || !params.id) {
+        if (!body.teamMemberId || !body.projectId) {
             throw new CustomError(
-                "All fields are required: teamMemberId, project Id",
+                "All fields are required: teamMemberId, projectId",
                 400
             );
         }
 
         await projectService.addContributor(
-            adminId,
-            params.id,
-            body.teamMemberId
+            body.projectId,
+            body.teamMemberId,
+            adminId
         );
 
         res.status(200).json({
-            message: `Team member with ${body.teamMemberId} id was added to project with ${params.id} id`,
+            message: `Team member with ${body.teamMemberId} id was added to project with ${body.projectId} id`,
         });
     });
 
     deactivateContributor = catchAsync(async (req, res) => {
-        const { adminId, body, params } = req;
+        const { adminId, body } = req;
 
-        if (!body.teamMemberId || !params.id) {
+        if (!body.teamMemberId || !body.projectId) {
             throw new CustomError(
-                "All fields are required: teamMemberId, project Id",
+                "All fields are required: teamMemberId, projectId",
                 400
             );
         }
 
-        await projectService.deactivateContributor(
+        await projectService.changeContributorStatus(
+            body.projectId,
+            body.teamMemberId,
             adminId,
-            params.id,
-            body.teamMemberId
+            "INACTIVE"
+        );
+
+        res.status(204).send();
+    });
+
+    reactivateContributor = catchAsync(async (req, res) => {
+        const { adminId, body } = req;
+
+        if (!body.teamMemberId || !body.projectId) {
+            throw new CustomError(
+                "All fields are required: teamMemberId, projectId",
+                400
+            );
+        }
+
+        await projectService.changeContributorStatus(
+            body.projectId,
+            body.teamMemberId,
+            adminId,
+            "ACTIVE"
         );
 
         res.status(204).send();
