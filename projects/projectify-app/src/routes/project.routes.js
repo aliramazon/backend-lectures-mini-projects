@@ -1,31 +1,66 @@
 import { Router } from "express";
-import { userMiddleware } from "../middlewares/user.middleware.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { projectController } from "../controllers/project.controller.js";
 
 const projectRouter = Router();
+projectRouter.post(
+    "/contributors/add",
+    authMiddleware.authenticate,
+    authMiddleware.isAdmin,
+    projectController.addContributor
+);
 
-projectRouter.post("/", userMiddleware.authenticate, projectController.create);
+projectRouter.patch(
+    "/contributors/deactivate",
+    authMiddleware.authenticate,
+    authMiddleware.isAdmin,
+    projectController.deactivateContributor
+);
+
+projectRouter.patch(
+    "/contributors/reactivate",
+    authMiddleware.authenticate,
+    authMiddleware.isAdmin,
+    projectController.reactivateContributor
+);
+
+projectRouter.post(
+    "/",
+    authMiddleware.authenticate,
+    authMiddleware.isAdmin,
+    projectController.create
+);
+
 projectRouter.get(
     "/:id",
-    userMiddleware.authenticate,
+    authMiddleware.authenticate,
+    authMiddleware.isAdmin,
     projectController.getOne
 );
 
 projectRouter.patch(
     "/:id",
-    userMiddleware.authenticate,
+    authMiddleware.authenticate,
+    authMiddleware.isAdmin,
     projectController.update
 );
-projectRouter.get("/", userMiddleware.authenticate, projectController.getAll);
+projectRouter.get(
+    "/",
+    authMiddleware.authenticate,
+    authMiddleware.isAdmin,
+    projectController.getAll
+);
 
 projectRouter.patch(
     "/:id/archive",
-    userMiddleware.authenticate,
+    authMiddleware.authenticate,
+    authMiddleware.isAdmin,
     projectController.archive
 );
 projectRouter.patch(
     "/:id/reactivate",
-    userMiddleware.authenticate,
+    authMiddleware.authenticate,
+    authMiddleware.isAdmin,
     projectController.reactivate
 );
 

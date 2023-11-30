@@ -1,19 +1,20 @@
 import { prisma } from "../prisma/index.js";
 import { CustomError } from "../utils/custom-error.js";
+import { teamMemberService } from "./team-member.service.js";
 
 class ProjectService {
-    create = async (input, userId) => {
+    create = async (input, adminId) => {
         const project = await prisma.project.create({
             data: {
                 ...input,
-                userId: userId,
+                adminId: adminId,
             },
         });
 
         return project;
     };
 
-    getOne = async (id, userId) => {
+    getOne = async (id, adminId) => {
         const project = await prisma.project.findUnique({
             where: {
                 id: id,
@@ -24,9 +25,9 @@ class ProjectService {
             throw new CustomError("Project does not exist", 404);
         }
 
-        if (project.userId !== userId) {
+        if (project.adminId !== adminId) {
             throw new CustomError(
-                "Forbidden: This project does not belong to you!",
+                "Forbidden: You are not authorized to perform this action",
                 403
             );
         }
@@ -34,11 +35,27 @@ class ProjectService {
         return project;
     };
 
-    update = async (id, userId, update) => {
+    update = async (id, adminId, update) => {
+        const project = await prisma.project.findUnique({
+            where: {
+                id: id,
+            },
+        });
+
+        if (!project) {
+            throw new CustomError("Project does not exist", 404);
+        }
+
+        if (project.adminId !== adminId) {
+            throw new CustomError(
+                "Forbidden: You are not authorized to perform this action",
+                403
+            );
+        }
+
         await prisma.project.update({
             where: {
                 id: id,
-                userId: userId,
             },
             data: {
                 ...update,
@@ -46,27 +63,94 @@ class ProjectService {
         });
     };
 
-    getAll = async (userId) => {
+    getAll = async (adminId) => {
         const projects = await prisma.project.findMany({
             where: {
-                userId: userId,
+                adminId: adminId,
             },
         });
 
         return projects;
     };
 
-    changeStatus = async (id, userId, status) => {
+    changeStatus = async (id, adminId, status) => {
+        const project = await prisma.project.findUnique({
+            where: {
+                id: id,
+            },
+        });
+
+        if (!project) {
+            throw new CustomError("Project does not exist", 404);
+        }
+
+        if (project.adminId !== adminId) {
+            throw new CustomError(
+                "Forbidden: You are not authorized to perform this action",
+                403
+            );
+        }
         await prisma.project.update({
             where: {
                 id: id,
-                userId: userId,
+                adminId: adminId,
             },
 
             data: {
                 status: status,
             },
         });
+    };
+
+    addContributor = async (projectId, teamMemberId, adminId) => {
+        await this.isProjectBelongsToAdmin(projectId, adminId);
+        await teamMemberService.isTeamMemberBelongsToAdmin(
+            teamMemberId,
+            adminId
+        );
+        await prisma.teamMemberProject.create({
+            data: { projectId, teamMemberId },
+        });
+    };
+
+    changeContributorStatus = async (
+        projectId,
+        teamMemberId,
+        adminId,
+        status
+    ) => {
+        await this.isProjectBelongsToAdmin(projectId, adminId);
+        await teamMemberService.isTeamMemberBelongsToAdmin(
+            teamMemberId,
+            adminId
+        );
+        await prisma.teamMemberProject.updateMany({
+            where: {
+                projectId,
+                teamMemberId,
+            },
+            data: {
+                status,
+            },
+        });
+    };
+
+    isProjectBelongsToAdmin = async (id, adminId) => {
+        const project = await prisma.project.findUnique({
+            where: {
+                id,
+            },
+        });
+
+        if (!project) {
+            throw new CustomError("Project does not exist", 404);
+        }
+        if (project.adminId !== adminId) {
+            throw new CustomError(
+                "Forbidden: You are not authorized to perform this action",
+                404
+            );
+        }
     };
 }
 

@@ -23,6 +23,11 @@ enum TaskStatus {
     DONE
 }
 
+enum TeamMemberProjectStatus {
+    ACTIVE
+    INACTIVE
+}
+
 type Tasks {
     id          String
     title       String
@@ -36,10 +41,10 @@ model Company {
     name     String
     position String
 
-    userId String @unique @db.ObjectId
+    adminId String @unique @db.ObjectId
 }
 
-model User {
+model Admin {
     id                               String        @id @default(auto()) @map("_id") @db.ObjectId
     email                            String        @unique
     preferredFirstName               String?
@@ -60,5 +65,31 @@ model Project {
     name        String
     description String
     status      ProjectStatus @default(ACTIVE)
-    userId      String        @db.ObjectId
+    adminId     String        @db.ObjectId
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+}
+
+model TeamMember {
+    id          String        @id @default(auto()) @map("_id") @db.ObjectId
+    firstName   String
+    lastName    String
+    position    String
+    email       String        @unique
+    password    String?
+    status      AccountStatus @default(INACTIVE)
+    adminId     String        @db.ObjectId
+    inviteToken String?
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+}
+
+model TeamMemberProject {
+    id           String                  @id @default(auto()) @map("_id") @db.ObjectId
+    teamMemberId String                  @db.ObjectId
+    projectId    String                  @db.ObjectId
+    status       TeamMemberProjectStatus @default(ACTIVE)
+    joinedAt     DateTime                @default(now())
+
+    // @@unique(fields: [teamMemberId, projectId]) this works only for SQL DB
 }
