@@ -40,6 +40,19 @@ class AuthMiddleware {
 
         next();
     };
+
+    isTeamMember = (req, _, next) => {
+        const { teamMember } = req;
+
+        if (!teamMember) {
+            throw new CustomError(
+                "Forbidden: You are not authorized to perform this action",
+                403
+            );
+        }
+
+        next();
+    };
 }
 
 export const authMiddleware = new AuthMiddleware();
