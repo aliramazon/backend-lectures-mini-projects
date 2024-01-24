@@ -83,6 +83,7 @@ class AdminService {
         const token = jwt.sign(
             {
                 adminId: admin.id,
+                role: "admin",
             },
             process.env.JWT_SECRET,
             {
@@ -214,7 +215,7 @@ class AdminService {
         });
 
         if (!admin) {
-            throw new Error("Admin does not exist anymore, 404");
+            throw new CustomError("Admin does not exist", 404);
         }
 
         const company = await prisma.company.findFirst({
@@ -225,7 +226,7 @@ class AdminService {
             },
         });
 
-        return { ...admin, company };
+        return { ...admin, company, role: "admin" };
     };
 
     createTask = async (adminId, input) => {
