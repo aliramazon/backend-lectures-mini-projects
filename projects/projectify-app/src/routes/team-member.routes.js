@@ -11,6 +11,13 @@ teamMemberRouter.post(
     teamMemberController.create
 );
 
+teamMemberRouter.get(
+    "/me",
+    authMiddleware.authenticate,
+    authMiddleware.isTeamMember,
+    teamMemberController.getMe
+);
+
 teamMemberRouter.patch("/create-password", teamMemberController.createPassword);
 
 teamMemberRouter.get(

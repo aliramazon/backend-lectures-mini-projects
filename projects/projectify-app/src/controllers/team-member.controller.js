@@ -33,11 +33,19 @@ class TeamMemberController {
 
     createPassword = catchAsync(async (req, res) => {
         const {
-            query: { inviteToken },
+            headers,
             body: { password, passwordConfirm, email },
         } = req;
+        if (!headers.authorization) {
+            throw new CustomError("You are not logged in. Please, log in", 401);
+        }
+        const [prefix, token] = headers.authorization.split(" ");
 
-        if (!inviteToken) {
+        if (!prefix || !token) {
+            throw new CustomError("Not Valid Token", 400);
+        }
+
+        if (!token) {
             throw new CustomError("Invite Token is missing", 400);
         }
 
@@ -55,7 +63,7 @@ class TeamMemberController {
             );
         }
 
-        await teamMemberService.createPassword(inviteToken, password, email);
+        await teamMemberService.createPassword(token, password, email);
 
         res.status(200).json({
             message: "You successfully created a password. Now, you can log in",
@@ -113,6 +121,15 @@ class TeamMemberController {
             token,
             projectIds,
             me,
+        });
+    });
+
+    getMe = catchAsync(async (req, res) => {
+        const { teamMember } = req;
+        const me = await teamMemberService.getMe(teamMember.id);
+
+        req.status(200).json({
+            data: me,
         });
     });
 }
