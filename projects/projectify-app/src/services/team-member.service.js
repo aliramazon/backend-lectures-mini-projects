@@ -137,9 +137,10 @@ class TeamMemberService {
             },
         });
 
-        if (!teamMember) throw new CustomError("User does not exist", 404);
+        if (!teamMember)
+            throw new CustomError("Team member does not exist", 404);
 
-        if (teamMember.status === "INACTIVE" && !teamMember.password) {
+        if (teamMember.status === "INACTIVE") {
             const inviteToken = crypto.createToken();
             const hashedInviteToken = crypto.hash(inviteToken);
 
@@ -162,9 +163,9 @@ class TeamMemberService {
             );
         }
 
-        if (teamMember.status === "INACTIVE" && teamMember.password) {
+        if (teamMember.status === "DEACTIVATED") {
             throw new CustomError(
-                "Your account has INACTIVE Status, can not log in",
+                "Oops. You do not have an access to the platform anymore!",
                 401
             );
         }
@@ -177,18 +178,6 @@ class TeamMemberService {
         if (!isPasswordMatches) {
             throw new CustomError("Invalid Credentials", 401);
         }
-
-        const projects = await prisma.teamMemberProject.findMany({
-            where: {
-                teamMemberId: teamMember.id,
-                status: "ACTIVE",
-            },
-            select: {
-                projectId: true,
-            },
-        });
-
-        const projectIds = projects.map((project) => project.projectId);
 
         const token = jwt.sign(
             {
@@ -203,12 +192,7 @@ class TeamMemberService {
             }
         );
 
-        const teamMemberWithoutPassword = {
-            firstName: teamMember.firstName,
-            lastName: teamMember.lastName,
-        };
-
-        return { token, projectIds, me: teamMemberWithoutPassword };
+        return token;
     };
 
     getMe = async (id) => {
