@@ -37,16 +37,12 @@ class TeamMemberController {
             body: { password, passwordConfirm, email },
         } = req;
         if (!headers.authorization) {
-            throw new CustomError("You are not logged in. Please, log in", 401);
+            throw new CustomError("Invite Token is missing", 401);
         }
         const [prefix, token] = headers.authorization.split(" ");
 
         if (!prefix || !token) {
-            throw new CustomError("Not Valid Token", 400);
-        }
-
-        if (!token) {
-            throw new CustomError("Invite Token is missing", 400);
+            throw new CustomError("Token was not sent in correct form", 400);
         }
 
         if (!password || !passwordConfirm || !email) {

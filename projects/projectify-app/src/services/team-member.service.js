@@ -33,7 +33,6 @@ class TeamMemberService {
                 inviteToken: hashedInviteToken,
             },
         });
-        console.log(teamMember);
 
         if (!teamMember) {
             throw new CustomError("Invalid Token", 400);
