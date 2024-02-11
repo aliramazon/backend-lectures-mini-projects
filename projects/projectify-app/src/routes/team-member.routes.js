@@ -41,5 +41,12 @@ teamMemberRouter.patch(
     teamMemberController.reactivate
 );
 
+teamMemberRouter.delete(
+    "/delete",
+    authMiddleware.authenticate,
+    authMiddleware.isAdmin,
+    teamMemberController.delete
+);
+
 teamMemberRouter.post("/login", teamMemberController.login);
 export { teamMemberRouter };
