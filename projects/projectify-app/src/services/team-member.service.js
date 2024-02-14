@@ -36,11 +36,14 @@ class TeamMemberService {
     };
 
     delete = async (adminId, teamMemberId) => {
-        const teamMember = await prisma.teamMember.findFirst({
+        console.log(adminId, teamMemberId);
+        const teamMember = await prisma.teamMember.findUnique({
             where: {
                 id: teamMemberId,
             },
         });
+
+        console.log(teamMember);
 
         if (!teamMember) {
             throw new CustomError(
@@ -61,7 +64,8 @@ class TeamMemberService {
             teamMember.status === "DEACTIVATED"
         ) {
             throw new CustomError(
-                "Only users with INACTIVE status can be deleted!"
+                "Only users with INACTIVE status can be deleted!",
+                404
             );
         }
 
@@ -136,6 +140,13 @@ class TeamMemberService {
         if (teamMember.adminId !== adminId) {
             throw new CustomError(
                 "Forbidden: You are not authorized to perform this action",
+                403
+            );
+        }
+
+        if (teamMember.status === "INACTIVE") {
+            throw new CustomError(
+                "Status Change is now allowed. Users with INACTIVE status can be deleted only!",
                 403
             );
         }
