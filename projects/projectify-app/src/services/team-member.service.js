@@ -36,14 +36,11 @@ class TeamMemberService {
     };
 
     delete = async (adminId, teamMemberId) => {
-        console.log(adminId, teamMemberId);
         const teamMember = await prisma.teamMember.findUnique({
             where: {
                 id: teamMemberId,
             },
         });
-
-        console.log(teamMember);
 
         if (!teamMember) {
             throw new CustomError(
@@ -159,6 +156,18 @@ class TeamMemberService {
 
             data: {
                 status: status,
+            },
+        });
+    };
+
+    update = async (adminId, teamMemberId, updateData) => {
+        await prisma.teamMember.update({
+            where: {
+                id: teamMemberId,
+                adminId: adminId,
+            },
+            data: {
+                ...updateData,
             },
         });
     };
