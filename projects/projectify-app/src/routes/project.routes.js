@@ -64,4 +64,11 @@ projectRouter.patch(
     projectController.reactivate
 );
 
+projectRouter.patch(
+    "/:id/onhold",
+    authMiddleware.authenticate,
+    authMiddleware.isAdmin,
+    projectController.onhold
+);
+
 export { projectRouter };
