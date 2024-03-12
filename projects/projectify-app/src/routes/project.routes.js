@@ -24,6 +24,13 @@ projectRouter.patch(
     projectController.reactivateContributor
 );
 
+projectRouter.get(
+    "/:id/contributors",
+    authMiddleware.authenticate,
+    authMiddleware.isAdmin,
+    projectController.getContributors
+);
+
 projectRouter.post(
     "/",
     authMiddleware.authenticate,
